@@ -88,25 +88,38 @@ async function main() {
     const tool_name = tool_calls[0].function.name;
     const { file_path } = JSON.parse(tool_calls[0].function.arguments);
 
-    let file_content = null;
-
     if (tool_name == "write") {
-      file_content = fs.writeFileSync(file_path, assistant_message.content);
-    }
-
-    if (tool_name == "read") {
-      file_content = fs.readFileSync(file_path, "utf8");
+      const result = await writeFile(file_path, assistant_message.content);
+      messages.push(assistant_message, {
+        role: "tool",
+        tool_call_id: tool_calls[0].id,
+        content: result,
+      });
+    } else if (tool_name == "read") {
+      const result = await readFile(file_path);
+      messages.push(assistant_message, {
+        role: "tool",
+        tool_call_id: tool_calls[0].id,
+        content: result,
+      });
     } else {
       console.log(assistant_message.content);
       return;
     }
 
-    messages.push(assistant_message, {
-      role: "tool",
-      tool_call_id: tool_calls[0].id,
-      content: file_content,
-    });
     await get_response(model, messages, tools);
+  }
+
+  async function readFile(filePath) {
+    const file_content = fs.readFileSync(filePath, "utf8");
+
+    return file_content;
+  }
+
+  async function writeFile(filePath, content) {
+    const write_content = fs.writeFileSync(filePath, content);
+
+    return readFile(filePath);
   }
 }
 

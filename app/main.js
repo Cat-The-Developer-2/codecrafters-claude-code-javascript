@@ -1,4 +1,5 @@
 import OpenAI from "openai";
+import { readFileSync } from "fs";
 
 async function main() {
   const [, , flag, prompt] = process.argv;
@@ -69,11 +70,17 @@ async function main() {
     throw new Error("no choices in response");
   }
 
+  if (response.choices[0].message.tool_calls) {
+    const tool = response.choices[0].message.tool_calls[0];
+    const args = JSON.parse(tool.function.arguments);
+    var fileBuffer = readFileSync(args.file_path, "utf-8");
+    console.log(fileBuffer);
+  } else {
+    console.log(response.choices[0].message.content);
+  }
+
   // You can use print statements as follows for debugging, they'll be visible when running tests.
   console.error("Logs from your program will appear here!");
-
-  // TODO: Uncomment the lines below to pass the first stage
-  console.log(response.choices[0].message.content);
 }
 
 main();

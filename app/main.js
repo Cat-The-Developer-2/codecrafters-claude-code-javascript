@@ -63,7 +63,14 @@ async function main() {
     },
   ];
 
-  const messages = [{ role: "user", content: prompt }];
+  const messages = [
+    {
+      role: "system",
+      content:
+        "When using the write tool, the content parameter must contain only the raw file content. No explanations, no preamble, no markdown — just the exact bytes to write to the file.",
+    },
+    { role: "user", content: prompt },
+  ];
 
   await get_response(model, messages, tools);
 

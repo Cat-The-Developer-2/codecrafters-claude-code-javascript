@@ -3,8 +3,8 @@ import { readFileSync } from "fs";
 
 async function main() {
   const [, , flag, prompt] = process.argv;
-  const apiKey = process.env.OPENROUTER_API_KEY;
-  const baseURL =
+  const API_KEY = process.env.OPENROUTER_API_KEY;
+  const BASE_URL =
     process.env.OPENROUTER_BASE_URL ?? "https://openrouter.ai/api/v1";
 
   if (!apiKey) {
@@ -15,70 +15,96 @@ async function main() {
   }
 
   const client = new OpenAI({
-    apiKey: apiKey,
-    baseURL: baseURL,
+    apiKey: API_KEY,
+    baseURL: BASE_URL,
   });
 
-  const response = await client.chat.completions.create({
-    model: "anthropic/claude-haiku-4.5",
-    messages: [{ role: "user", content: prompt }],
-    tools: [
-      {
-        type: "function",
-        function: {
-          name: "Read",
-          description: "Read and return the contents of a file",
-          parameters: {
-            type: "object",
-            properties: {
-              file_path: {
-                type: "string",
-                description: "The path to the file read",
-              },
+  const TOOLS = [
+    {
+      type: "function",
+      function: {
+        name: "Read",
+        description: "Read and return the contents of a file",
+        parameters: {
+          type: "object",
+          properties: {
+            file_path: {
+              type: "string",
+              description: "The path to the file read",
             },
           },
         },
       },
-    ],
-    tool_calls: [
-      {
-        choices: [
-          {
-            index: 0,
-            message: {
-              role: "assistant",
-              content: null,
-              tool_calls: [
-                {
-                  id: "abc_123",
-                  type: "function",
-                  function: {
-                    name: "Read",
-                    arguments: '{"file_path": "/path/to/file.txt"}',
-                  },
+    },
+  ];
+
+  const TOOL_CALLS = [
+    {
+      choices: [
+        {
+          index: 0,
+          message: {
+            role: "assistant",
+            content: null,
+            tool_calls: [
+              {
+                id: "abc_123",
+                type: "function",
+                function: {
+                  name: "Read",
+                  arguments: '{"file_path": "/path/to/file.txt"}',
                 },
-              ],
-            },
-            finish_reason: "tool_calls",
+              },
+            ],
           },
-        ],
-      },
-    ],
-  });
+          finish_reason: "tool_calls",
+        },
+      ],
+    },
+  ];
 
-  if (!response.choices || response.choices.length === 0) {
-    throw new Error("no choices in response");
+  const MODEL = "anthropic/claude-haiku-4.5";
+
+  let messages = [
+    {
+      role: "user",
+      content: "Summarize the README for me.",
+      tools: [{ type: "Read" }],
+    },
+  ];
+
+  async function getResponse(messages) {
+    const response = await client.chat.completions.create({
+      model: MODEL,
+      messages: messages,
+      tools: TOOLS,
+      tool_calls: TOOL_CALLS,
+    });
+
+    if (!response.choices || response.choices.length === 0) {
+      throw new Error("no choices in response");
+    }
+
+    const assistant_message = response.choices[0].message;
+    const tool_calls = assistant_message.tool_calls;
+
+    if (!tool_calls || tool_calls.length === 0) {
+      console.log(assistant_message.content);
+      return;
+    }
+
+    const tool_name = tool_calls[0].function.name;
+
+    const { file_path } = JSON.parse(tool_calls[0].function.arguments);
+    const file_content = fs.readFileSync(file_path, "utf8");
+
+    messages.push(assistant_message, {
+      role: "tool",
+      tool_call_id: tool_calls[0].id,
+      content: file_content,
+    });
+    await get_response(messages);
   }
-
-  if (response.choices[0].message.tool_calls) {
-    const tool = response.choices[0].message.tool_calls[0];
-    const args = JSON.parse(tool.function.arguments);
-    var fileBuffer = readFileSync(args.file_path, "utf-8");
-    console.log(fileBuffer);
-  } else {
-    console.log(response.choices[0].message.content);
-  }
-
   // You can use print statements as follows for debugging, they'll be visible when running tests.
   console.error("Logs from your program will appear here!");
 }

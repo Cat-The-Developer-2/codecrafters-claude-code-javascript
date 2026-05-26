@@ -93,6 +93,11 @@ async function main() {
       return;
     }
 
+    if (tool_name !== "read") {
+      console.log(assistant_message.content);
+      return;
+    }
+
     const tool_name = tool_calls[0].function.name;
 
     const { file_path } = JSON.parse(tool_calls[0].function.arguments);
@@ -103,10 +108,11 @@ async function main() {
       tool_call_id: tool_calls[0].id,
       content: file_content,
     });
-    await get_response(messages);
+
+    await getResponse(messages);
+
+    console.log(file_content);
   }
-  // You can use print statements as follows for debugging, they'll be visible when running tests.
-  console.error("Logs from your program will appear here!");
 }
 
 main();

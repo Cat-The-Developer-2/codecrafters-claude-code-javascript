@@ -86,15 +86,6 @@ async function main() {
     }
 
     const tool_name = tool_calls[0].function.name;
-
-    if (tool_name !== "read") {
-      console.log(assistant_message.content);
-      return;
-    }
-
-    if (tool_name == "write") {
-    }
-
     const { file_path } = JSON.parse(tool_calls[0].function.arguments);
 
     let file_content = null;
@@ -105,6 +96,9 @@ async function main() {
 
     if (tool_name == "read") {
       file_content = fs.readFileSync(file_path, "utf8");
+    } else {
+      console.log(assistant_message.content);
+      return;
     }
 
     messages.push(assistant_message, {

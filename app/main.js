@@ -13,7 +13,7 @@ async function main() {
 
   const client = new OpenAI({ apiKey, baseURL });
 
-  const model = "baidu/cobuddy:free";
+  const model = "anthropic/claude-haiku-4.5";
 
   const tools = [
     {

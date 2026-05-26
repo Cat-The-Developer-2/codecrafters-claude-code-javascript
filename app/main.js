@@ -119,8 +119,8 @@ async function main() {
 
   async function writeFile(filePath, content) {
     const dir = path.dirname(filePath);
-    await fs.mkdir(dir, { recursive: true });
-    await fs.writeFile(filePath, content, "utf-8");
+    fs.mkdirSync(dir, { recursive: true });
+    fs.writeFileSync(filePath, content, "utf-8");
 
     return `Successfully wrote to ${filePath}`;
   }

@@ -1,13 +1,13 @@
 import OpenAI from "openai";
-import { readFileSync } from "fs";
+import fs from "fs";
 
 async function main() {
   const [, , flag, prompt] = process.argv;
-  const API_KEY = process.env.OPENROUTER_API_KEY;
-  const BASE_URL =
+  const apiKey = process.env.OPENROUTER_API_KEY;
+  const baseURL =
     process.env.OPENROUTER_BASE_URL ?? "https://openrouter.ai/api/v1";
 
-  if (!API_KEY) {
+  if (!apiKey) {
     throw new Error("OPENROUTER_API_KEY is not set");
   }
   if (flag !== "-p" || !prompt) {
@@ -15,46 +15,41 @@ async function main() {
   }
 
   const client = new OpenAI({
-    apiKey: API_KEY,
-    baseURL: BASE_URL,
+    apiKey: apiKey,
+    baseURL: baseURL,
   });
 
-  const TOOLS = [
+  const model = "anthropic/claude-haiku-4.5";
+
+  const tools = [
     {
       type: "function",
       function: {
-        name: "Read",
-        description: "Read and return the contents of a file",
+        name: "read",
+        description: "read and return contents of a file",
         parameters: {
           type: "object",
           properties: {
             file_path: {
               type: "string",
-              description: "The path to the file read",
+              description: "path to a file to read",
             },
           },
+          required: ["file_path"],
         },
       },
     },
   ];
 
-  const MODEL = "anthropic/claude-haiku-4.5";
+  const messages = [{ role: "user", content: prompt }];
 
-  let messages = [
-    {
-      role: "user",
-      content: "Summarize the README for me.",
-      tools: [{ type: "Read" }],
-    },
-  ];
+  await get_response(model, messages, tools);
 
-  await getResponse(messages);
-
-  async function getResponse(messages) {
+  async function get_response(model, messages, tools) {
     const response = await client.chat.completions.create({
-      model: MODEL,
+      model: model,
       messages: messages,
-      tools: TOOLS,
+      tools: tools,
     });
 
     if (!response.choices || response.choices.length === 0) {
@@ -69,23 +64,22 @@ async function main() {
       return;
     }
 
+    const tool_name = tool_calls[0].function.name;
+
     if (tool_name !== "read") {
       console.log(assistant_message.content);
       return;
     }
 
-    const tool_name = tool_calls[0].function.name;
-
     const { file_path } = JSON.parse(tool_calls[0].function.arguments);
-    const file_content = readFileSync(file_path, "utf8");
+    const file_content = fs.readFileSync(file_path, "utf8");
 
     messages.push(assistant_message, {
       role: "tool",
       tool_call_id: tool_calls[0].id,
       content: file_content,
     });
-
-    await getResponse(messages);
+    await get_response(model, messages, tools);
   }
 }
 

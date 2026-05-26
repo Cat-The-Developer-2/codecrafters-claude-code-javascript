@@ -39,6 +39,27 @@ async function main() {
         },
       },
     },
+    {
+      type: "function",
+      function: {
+        name: "write",
+        description: "Write content to a file",
+        parameters: {
+          type: "object",
+          required: ["file_path", "content"],
+          properties: {
+            file_path: {
+              type: "string",
+              description: "The path of the file to write to",
+            },
+            content: {
+              type: "string",
+              description: "The content to write to the file",
+            },
+          },
+        },
+      },
+    },
   ];
 
   const messages = [{ role: "user", content: prompt }];
@@ -71,8 +92,20 @@ async function main() {
       return;
     }
 
+    if (tool_name == "write") {
+    }
+
     const { file_path } = JSON.parse(tool_calls[0].function.arguments);
-    const file_content = fs.readFileSync(file_path, "utf8");
+
+    let file_content = null;
+
+    if (tool_name == "write") {
+      file_content = fs.writeFileSync(file_path, assistant_message.content);
+    }
+
+    if (tool_name == "read") {
+      file_content = fs.readFileSync(file_path, "utf8");
+    }
 
     messages.push(assistant_message, {
       role: "tool",

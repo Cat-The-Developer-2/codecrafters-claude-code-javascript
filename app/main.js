@@ -39,6 +39,30 @@ async function main() {
         },
       },
     ],
+    tool_calls: [
+      {
+        choices: [
+          {
+            index: 0,
+            message: {
+              role: "assistant",
+              content: null,
+              tool_calls: [
+                {
+                  id: "abc_123",
+                  type: "function",
+                  function: {
+                    name: "Read",
+                    arguments: '{"file_path": "/path/to/file.txt"}',
+                  },
+                },
+              ],
+            },
+            finish_reason: "tool_calls",
+          },
+        ],
+      },
+    ],
   });
 
   if (!response.choices || response.choices.length === 0) {

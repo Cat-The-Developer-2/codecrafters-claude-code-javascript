@@ -1,34 +1,52 @@
-[![progress-banner](https://backend.codecrafters.io/progress/claude-code/2b7aeec4-948e-4bff-92d3-c6c15f909610)](https://app.codecrafters.io/users/codecrafters-bot?r=2qF)
+# Claude Code Agent
 
-This is a starting point for JavaScript solutions to the
-["Build Your own Claude Code" Challenge](https://codecrafters.io/challenges/claude-code).
+A minimal CLI agent that gives an LLM access to your filesystem and shell. Built with Node.js and OpenRouter.
 
-Claude Code is an AI coding assistant that uses Large Language Models (LLMs) to
-understand code and perform actions through tool calls. In this challenge,
-you'll build your own Claude Code from scratch by implementing an LLM-powered
-coding assistant.
+## What it does
 
-Along the way you'll learn about HTTP RESTful APIs, OpenAI-compatible tool
-calling, agent loop, and how to integrate multiple tools into an AI assistant.
+You pass in a prompt, the agent runs a conversation loop with the model, and the model can read files, write files, and execute bash commands to complete the task.
 
-**Note**: If you're viewing this repo on GitHub, head over to
-[codecrafters.io](https://codecrafters.io) to try the challenge.
+## Tools
 
-# Passing the first stage
+| Tool    | What it does                                              |
+| ------- | --------------------------------------------------------- |
+| `read`  | Reads a file (or lists a directory)                       |
+| `write` | Writes content to a file, creating it if it doesn't exist |
+| `bash`  | Runs a shell command and returns stdout/stderr            |
 
-The entry point for your `claude-code` implementation is in `app/main.js`. Study
-and uncomment the relevant code, and submit to pass the first stage:
+## Setup
 
-```sh
-codecrafters submit
+```bash
+npm install
+export OPENROUTER_API_KEY=your_key_here
 ```
 
-# Stage 2 & beyond
+## Usage
 
-Note: This section is for stages 2 and beyond.
+```bash
+node app/main.js -p "your prompt here"
+```
 
-1. Ensure you have `node (25)` installed locally.
-2. Run `./your_program.sh` to run your program, which is implemented in
-   `app/main.js`.
-3. Run `codecrafters submit` to submit your solution to CodeCrafters. Test
-   output will be streamed to your terminal.
+### Examples
+
+```bash
+# Read a file and summarize it
+node app/main.js -p "Summarize README.md"
+
+# Create a file based on instructions
+node app/main.js -p "Read README.md and create the file it describes"
+
+# Run shell tasks
+node app/main.js -p "Delete README_old.md"
+```
+
+## Environment Variables
+
+| Variable              | Required | Default                        |
+| --------------------- | -------- | ------------------------------ |
+| `OPENROUTER_API_KEY`  | Yes      | —                              |
+| `OPENROUTER_BASE_URL` | No       | `https://openrouter.ai/api/v1` |
+
+## Model
+
+Uses `anthropic/claude-haiku-4.5` via OpenRouter by default. Change the `model` variable in `main.js` to swap it out.

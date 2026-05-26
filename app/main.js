@@ -7,7 +7,7 @@ async function main() {
   const BASE_URL =
     process.env.OPENROUTER_BASE_URL ?? "https://openrouter.ai/api/v1";
 
-  if (!apiKey) {
+  if (!API_KEY) {
     throw new Error("OPENROUTER_API_KEY is not set");
   }
   if (flag !== "-p" || !prompt) {

@@ -123,8 +123,6 @@ async function main() {
     await fs.writeFile(filePath, content, "utf-8");
 
     return `Successfully wrote to ${filePath}`;
-
-    return readFile(filePath);
   }
 }
 

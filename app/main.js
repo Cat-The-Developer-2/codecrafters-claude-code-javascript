@@ -59,7 +59,7 @@ async function main() {
     {
       type: "function",
       function: {
-        name: "Bash",
+        name: "bash",
         description: "Execute a shell command",
         parameters: {
           type: "object",

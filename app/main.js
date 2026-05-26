@@ -38,31 +38,6 @@ async function main() {
     },
   ];
 
-  const TOOL_CALLS = [
-    {
-      choices: [
-        {
-          index: 0,
-          message: {
-            role: "assistant",
-            content: null,
-            tool_calls: [
-              {
-                id: "abc_123",
-                type: "function",
-                function: {
-                  name: "Read",
-                  arguments: '{"file_path": "/path/to/file.txt"}',
-                },
-              },
-            ],
-          },
-          finish_reason: "tool_calls",
-        },
-      ],
-    },
-  ];
-
   const MODEL = "anthropic/claude-haiku-4.5";
 
   let messages = [
@@ -80,7 +55,6 @@ async function main() {
       model: MODEL,
       messages: messages,
       tools: TOOLS,
-      tool_calls: TOOL_CALLS,
     });
 
     if (!response.choices || response.choices.length === 0) {

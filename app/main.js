@@ -101,7 +101,7 @@ async function main() {
     const tool_name = tool_calls[0].function.name;
 
     const { file_path } = JSON.parse(tool_calls[0].function.arguments);
-    const file_content = fs.readFileSync(file_path, "utf8");
+    const file_content = readFileSync(file_path, "utf8");
 
     messages.push(assistant_message, {
       role: "tool",

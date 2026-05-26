@@ -1,6 +1,7 @@
 import OpenAI from "openai";
 import fs from "fs";
 import path from "path";
+import { execSync } from "child_process";
 
 async function main() {
   const [, , flag, prompt] = process.argv;
@@ -55,6 +56,23 @@ async function main() {
         },
       },
     },
+    {
+      type: "function",
+      function: {
+        name: "Bash",
+        description: "Execute a shell command",
+        parameters: {
+          type: "object",
+          required: ["command"],
+          properties: {
+            command: {
+              type: "string",
+              description: "The command to execute",
+            },
+          },
+        },
+      },
+    },
   ];
 
   const messages = [
@@ -99,6 +117,8 @@ async function main() {
         result = await writeFile(args.file_path, args.content);
       } else if (tool_name === "read") {
         result = await readFile(args.file_path);
+      } else if (tool_name === "bash") {
+        result = runBash(args.command);
       } else {
         result = `Unknown tool: ${tool_name}`;
       }
@@ -128,6 +148,18 @@ async function main() {
     fs.mkdirSync(dir, { recursive: true });
     fs.writeFileSync(filePath, content, "utf-8");
     return `Successfully wrote to ${filePath}`;
+  }
+
+  function runBash(command) {
+    try {
+      return execSync(command, {
+        encoding: "utf-8",
+        stdio: ["pipe", "pipe", "pipe"],
+        timeout: 10000,
+      });
+    } catch (e) {
+      return e.stderr || e.message;
+    }
   }
 }
 

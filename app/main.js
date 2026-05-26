@@ -100,7 +100,7 @@ async function main() {
     let file_content = null;
 
     if (tool_name == "write") {
-      file_content = fs.writeFileSync(file_path, assistant_message.content);
+      file_content = await fs.writeFile(file_path, assistant_message.content);
     }
 
     if (tool_name == "read") {

@@ -73,6 +73,8 @@ async function main() {
     },
   ];
 
+  await getResponse(messages);
+
   async function getResponse(messages) {
     const response = await client.chat.completions.create({
       model: MODEL,

@@ -110,8 +110,6 @@ async function main() {
     });
 
     await getResponse(messages);
-
-    console.log(file_content);
   }
 }
 

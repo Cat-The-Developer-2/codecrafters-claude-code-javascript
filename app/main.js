@@ -19,7 +19,7 @@ async function main() {
   });
 
   const response = await client.chat.completions.create({
-    model: "anthropic/claude-haiku-4.5",
+    model: "baidu/cobuddy:free",
     messages: [{ role: "user", content: prompt }],
     tools: [
       {
